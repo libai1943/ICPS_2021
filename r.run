@@ -1,0 +1,65 @@
+reset;
+shell ("del " & ("sol_status.txt"));
+printf "0">>("sol_status.txt");
+close ("sol_status.txt");
+
+model NLP.mod;
+include ig.INIVAL;
+option solver ipopt;
+solve;
+
+if (match (solve_message, "Optimal") > 0) then {
+	shell ("del " & ("sol_status.txt"));
+	printf "1">>("sol_status.txt");
+	close ("sol_status.txt");
+	
+	shell ("del " & ("x.txt"));
+	shell ("del " & ("y.txt"));
+	shell ("del " & ("xc.txt"));
+	shell ("del " & ("yc.txt"));
+	shell ("del " & ("theta.txt"));
+	shell ("del " & ("phy.txt"));
+	shell ("del " & ("v.txt"));
+	shell ("del " & ("terminal_moment.txt"));
+	shell ("del " & ("ig.INIVAL"));
+
+	for {i in {1..Nv}} {
+		for {j in {1..4}} {
+			for {k in {1..Nfe}} {
+				printf "let x[%d,%d,%d]:=%5.4f;\n",i,j,k,x[i,j,k]>>("ig.INIVAL");
+				printf "let y[%d,%d,%d]:=%5.4f;\n",i,j,k,y[i,j,k]>>("ig.INIVAL");
+				printf "let xc[%d,%d,%d]:=%5.4f;\n",i,j,k,xc[i,j,k]>>("ig.INIVAL");
+				printf "let yc[%d,%d,%d]:=%5.4f;\n",i,j,k,yc[i,j,k]>>("ig.INIVAL");
+				printf "let theta[%d,%d,%d]:=%5.4f;\n",i,j,k,theta[i,j,k]>>("ig.INIVAL");
+				printf "let v[%d,%d,%d]:=%5.4f;\n",i,j,k,v[i,j,k]>>("ig.INIVAL");
+				printf "%5.4f; ", x[i,j,k]>>("x.txt");
+				printf "%5.4f; ", y[i,j,k]>>("y.txt");
+				printf "%5.4f; ", xc[i,j,k]>>("xc.txt");
+				printf "%5.4f; ", yc[i,j,k]>>("yc.txt");			
+				printf "%5.4f; ", theta[i,j,k]>>("theta.txt");
+			}
+		}
+		for {k in {1..Nfe}} {
+			printf "let phy[%d,%d]:=%5.4f;\n",i,k,phy[i,k]>>("ig.INIVAL");
+			printf "%5.4f; ", phy[i,k]>>("phy.txt");
+		}		
+	}
+
+	for {i in {1..Nv}} {
+		for {j in {1..Nfe}} {
+			printf "%5.4f; ", v[i,1,j]>>("v.txt");
+		}		
+	}
+
+	printf "let tf := %5.4f;\n", tf>>("ig.INIVAL");
+	close ("ig.INIVAL");
+	close ("x.txt");
+	close ("y.txt");
+	close ("xc.txt");
+	close ("yc.txt");
+	close ("theta.txt");
+	close ("phy.txt");
+	close ("v.txt");
+	printf "%5.4f; ", tf >> ("terminal_moment.txt");
+	close ("terminal_moment.txt");
+};
