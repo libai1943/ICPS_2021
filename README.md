@@ -1,5 +1,7 @@
 # Cooperative Maneuver Planning for Multiple Tractor–Trailer Vehicles
 
+[Download ZIP](https://github.com/libai1943/ICPS_2021/archive/refs/heads/main.zip) · [Getting started](#quick-start-one-benchmark-first) · [Citation](#citation)
+
 **Coordinate several articulated vehicles through one cluttered workspace.** This MATLAB/AMPL repository accompanies:
 
 > Bai Li, Youmin Zhang, Ming Yue, Xiaoyan Peng, Xiang Zhong, and Qi Kong, “Cyber-physical System based Cooperative Maneuver Planning for Multiple Tractor-trailer Vehicles in a Cluttered Environment,” *2021 4th IEEE International Conference on Industrial Cyber-Physical Systems (ICPS)*, 297–302, 2021. [Paper / DOI](https://doi.org/10.1109/ICPS49255.2021.9468235).
@@ -48,9 +50,22 @@ setenv('PATH', ['C:\path\to\ampl', pathsep, getenv('PATH')]);
 RunMe;
 ```
 
-The original default is `10 : 40`, which runs **31 benchmarks**, not one. The `benchmarks/` directory contains 40 `.mat` inputs. A successful solve invokes the protected `asd.p` renderer. At the end of the selected batch, the script prints success rate, average optimization-loop CPU time, and average iteration count.
+The original default is `10 : 40`, which runs **31 benchmarks**, not one. The `benchmarks/` directory contains 40 `.mat` inputs. A successful solve invokes the protected `asd.p` renderer. At the end of the selected batch, the script prints success rate, average elapsed optimization-loop time, and average iteration count.
 
 `cpu_time` starts after initial-path generation and the first constraint selection. It is therefore **not the complete end-to-end planning time**. Failed runs are recorded in `success_rate`; do not infer success from old text files left by a previous run.
+
+### Read a completed case
+
+The batch keeps one entry per selected benchmark in MATLAB. Inspect the following quantities together to distinguish a fast rejected solve from an accepted maneuver.
+
+| Quantity | How to interpret it |
+| --- | --- |
+| `success_rate(k)` | 1 when the full check accepted the solution, 0 when the iteration limit ended the attempt. |
+| `num_iter(k)` | Number of reduced optimization attempts in the adaptive loop for this case. |
+| `cpu_time(k)` | Elapsed seconds measured by `tic`/`toc` around that loop. |
+| `terminal_moment.txt` | Planned duration from the most recent successful reduced solve. Pair it with the full acceptance check before using it as a case result. |
+
+For a single accepted benchmark, `[xc,yc] = LoadXY();` reads the exported centers. For example, `plot(squeeze(xc(1,4,:)), squeeze(yc(1,4,:)))` traces the fourth body's center on the first vehicle. Save per-case text outputs before starting another case if you want to compare trajectories.
 
 ## Parameters and files
 
